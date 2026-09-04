@@ -6,7 +6,7 @@ This repository contains the full model and training code, the pre-trained
 weights, and a reviewer notebook that replays the entire evaluation protocol
 without retraining anything.
 
-**The notebook in `notebooks/` is committed with its outputs**, and every figure
+**The reviewer notebook is committed with its outputs**, and every figure
 below is reproduced by running it. You can verify the paper's claims by reading
 this page, without executing a single cell.
 
@@ -16,16 +16,20 @@ this page, without executing a single cell.
 
 ### Option A — read only (0 minutes)
 
-Open [`notebooks/Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb`](notebooks/Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb).
+Open [`Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb`](Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb).
 All cells are pre-executed. The same content is available as standalone files
 under [`results/`](results/).
 
 ### Option B — re-run the evaluation
 
-Download this repository as a zip, upload it to Colab (GPU runtime, a T4 is
-enough), open the notebook, point `REPO_DIR` at the extracted folder in the
-configuration cell, and run all. The setup cell installs `torch-harmonics`,
-which is needed to rebuild the `SU2Stereo` architecture.
+Download this repository as a zip. Open the reviewer notebook in Colab with a
+GPU runtime, upload the zip to the session using the folder icon in the left
+sidebar, and run all. The setup cell extracts it, installs `torch-harmonics`,
+and loads the weights. Nothing else is required.
+
+(There is no Colab badge and no `git clone` step: both would reveal the
+repository owner during double-blind review. They will be restored on
+acceptance.)
 
 | `RUN_MODE` | Test set | Sweep resolution | Wall clock (T4) |
 |---|---|---|---|
@@ -280,25 +284,41 @@ accuracy curve flattened.
 
 ## 8. Environment
 
-The committed run used:
+Training and evaluation happened in two separate sessions, so both are
+recorded.
 
-- Python 3.12, PyTorch `<x.y.z>`, torchvision `<x.y.z>`
-- torch-harmonics 0.9.1
-- `<GPU model>`, CUDA `<version>`
-- Total compute for the released models: `<N>` GPU-hours
+**Training** (weights released here):
+
+- Python 3.12, torch-harmonics 0.9.1 from PyPI
+- Single GPU, one run per architecture; epoch counts are in Section 7 and the
+  per-epoch history is in `checkpoints/mnist_v10/history.csv`
+
+**Evaluation and export** (the committed notebook run):
+
+- Python 3.13.15, PyTorch 2.11.0+cu128, torchvision 0.26.0+cu128
+- torch-harmonics 0.9.1, built from source (no wheel for CPython 3.13)
+- NVIDIA L4, CUDA 12.8
+
+The two environments differ in Python version and in how `torch-harmonics` was
+obtained, but the pinned library version is the same, and `SpectralPoolS2` no
+longer depends on the library's default `mmax` (see Section 7). Phase A of the
+reviewer notebook checks that the released weights still reproduce the reported
+accuracies under the evaluation environment.
 
 Versions are pinned in `requirements.txt` and recorded in `manifest.json`.
-Note the Python constraint: `torch-harmonics` 0.9.x ships wheels for CPython
-3.10-3.12 only and provides no source distribution, so on Python 3.13 pip falls
-back to 0.8.0 without warning. The reviewer notebook detects this and builds
-0.9.1 from source.
 
 ---
 
 ## 9. License and citation
 
-Code and weights are released under `<LICENSE>`. MNIST is used under its
-original terms.
+Code and weights are released under the BSD 3-Clause License; see
+[`LICENSE`](LICENSE).
+
+MNIST is used under its original terms and is not redistributed here: the
+notebook downloads it via `torchvision.datasets.MNIST`.
+
+`torch-harmonics` (NVIDIA) is a dependency, also under BSD 3-Clause. It is not
+vendored into this repository.
 
 Author and citation information is withheld during the double-blind review
 period and will be added on acceptance.
