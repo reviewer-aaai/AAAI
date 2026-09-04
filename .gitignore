@@ -1,0 +1,14 @@
+# Données et sorties
+data/
+results/
+*.pth
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Modèles privés (dé-commentez si vous gardez votre implémentation locale)
+# src/models.py

@@ -1,5 +1,27 @@
-torch>=2.0
-torchvision>=0.15
-numpy>=1.23
-pandas>=1.5
-matplotlib>=3.6
+# Environnement de reproduction — SU(2) × Sim(2) MNIST
+#
+# ⚠️  Python 3.12 requis.
+#     torch-harmonics ne publie de wheels que pour cp310–cp312 et ne fournit
+#     pas de distribution source pour les 0.9.x. Sous Python 3.13, pip
+#     redescend silencieusement à la 0.8.0, dont les transformées sphériques
+#     ont un comportement différent.
+#
+#     Sous Python 3.13, compiler depuis les sources :
+#       pip install --no-build-isolation \
+#           "git+https://github.com/NVIDIA/torch-harmonics.git@v0.9.1"
+
+torch==<x.y.z>
+torchvision==<x.y.z>
+torch-harmonics==0.9.1
+
+numpy
+pandas
+matplotlib
+tqdm
+
+# ── Note d'implémentation ───────────────────────────────────────────────────
+# SpectralPoolS2 passe explicitement mmax=out_lmax à InverseRealSHT au lieu de
+# s'appuyer sur la valeur par défaut de la bibliothèque, qui vaut nlon//2+1
+# dans les versions récentes. Le modèle est donc indépendant de la version de
+# torch-harmonics ; l'épinglage ci-dessus ne sert que la stricte
+# reproductibilité numérique.

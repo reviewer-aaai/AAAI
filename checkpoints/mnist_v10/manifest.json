@@ -1,0 +1,112 @@
+{
+  "experiment": "Ablation_SU2xSim2_MNIST_V10_Reviewers",
+  "dataset": "mnist",
+  "img_size": 64,
+  "in_channels": 1,
+  "normalize": {
+    "mean": [
+      0.1307
+    ],
+    "std": [
+      0.3081
+    ]
+  },
+  "eval_transform": "Resize(64) + RandomCrop(64, padding=6)",
+  "excluded_classes": [
+    1,
+    9
+  ],
+  "seed": 42,
+  "torch_version": "2.11.0+cu128",
+  "gpu": "NVIDIA L4",
+  "exported_at": "2026-09-04T10:20:28Z",
+  "models": {
+    "Classic": {
+      "file": "Classic.pth",
+      "format": "state_dict",
+      "params": 498219,
+      "val_acc": 99.59,
+      "width_mult": 0.27734374776482584,
+      "epochs": 20,
+      "train_hparams": {
+        "lr": 0.0005,
+        "weight_decay": 0.0001,
+        "batch_size": 128,
+        "accum": 1
+      },
+      "sha256": "a74545478f3aa53e165e20feef9b407e88ac7c967be1e6c737e41727a9824675"
+    },
+    "Sim2Only": {
+      "file": "Sim2Only.pth",
+      "format": "state_dict",
+      "params": 511135,
+      "val_acc": 99.34,
+      "width_mult": 0.24609375074505807,
+      "epochs": 20,
+      "train_hparams": {
+        "lr": 0.0005,
+        "weight_decay": 0.0001,
+        "batch_size": 128,
+        "accum": 1
+      },
+      "sha256": "cb04459cf2d64da4d2ed49857e2d7f5f1661c100dc39e2e149703f52ef36acce"
+    },
+    "SU2Stereo": {
+      "file": "SU2Stereo.pth",
+      "format": "state_dict",
+      "params": 503012,
+      "val_acc": 94.53,
+      "width_mult": 0.5729166679084301,
+      "epochs": 30,
+      "train_hparams": {
+        "batch_size": 512,
+        "lr": 0.0006,
+        "weight_decay": 0.005,
+        "accum": 1
+      },
+      "sha256": "20bb77ccbe7e3487c95619eecaae407cbf48f1c52b871aa5178800ec258b0d54"
+    },
+    "BiLogPolar": {
+      "file": "BiLogPolar.pth",
+      "format": "state_dict",
+      "params": 489949,
+      "val_acc": 98.57,
+      "width_mult": 0.273437499254942,
+      "epochs": 25,
+      "train_hparams": {
+        "lr": 0.0004,
+        "weight_decay": 0.0001,
+        "batch_size": 128,
+        "accum": 1
+      },
+      "sha256": "fb52e4cd9b031b6534f5080fb0f63a1eeb0d51064642b01041f9335eed9ba5de"
+    }
+  },
+  "random_init": {
+    "Classic": {
+      "file": "Classic_random.pth",
+      "format": "state_dict",
+      "width_mult": 0.27734374776482584,
+      "sha256": "9e0a30403f14c15a395bf2341830bb4d2b6ed520beea103c34d66ebb8b901a38"
+    },
+    "Sim2Only": {
+      "file": "Sim2Only_random.pth",
+      "format": "state_dict",
+      "width_mult": 0.24609375074505807,
+      "sha256": "e0c765c3e084b82c197da7adcb48cda43fbd9ab158ad643003363de41459736a"
+    },
+    "SU2Stereo": {
+      "file": "SU2Stereo_random.pth",
+      "format": "state_dict",
+      "width_mult": 0.5729166679084301,
+      "sha256": "711390a00db5385ae591efd542326c1304743d813b51eb544b6f6e70b5d69712"
+    },
+    "BiLogPolar": {
+      "file": "BiLogPolar_random.pth",
+      "format": "state_dict",
+      "width_mult": 0.273437499254942,
+      "sha256": "956da78b9c87b19ba2faca172ed6f9869e1c81ad9c324bbd26cdf6252a949107"
+    }
+  },
+  "history": "history.csv"
+}
