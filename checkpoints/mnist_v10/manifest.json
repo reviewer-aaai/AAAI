@@ -1,5 +1,5 @@
 {
-  "experiment": "Ablation_SU2xSim2_MNIST_V10_Reviewers",
+  "experiment": "Ablation_SU2xSim2_MNIST_V10",
   "dataset": "mnist",
   "img_size": 64,
   "in_channels": 1,
@@ -16,16 +16,17 @@
     1,
     9
   ],
+  "output_contract": "forward(x) -> (logits, features)",
   "seed": 42,
   "torch_version": "2.11.0+cu128",
   "gpu": "NVIDIA L4",
-  "exported_at": "2026-09-04T10:20:28Z",
+  "exported_at": "2026-09-04T15:51:10Z",
   "models": {
     "Classic": {
-      "file": "Classic.pth",
-      "format": "state_dict",
+      "file": "Classic.ts.pt",
+      "format": "torchscript",
       "params": 498219,
-      "val_acc": 99.59,
+      "val_acc": 99.56,
       "width_mult": 0.27734374776482584,
       "epochs": 20,
       "train_hparams": {
@@ -34,13 +35,13 @@
         "batch_size": 128,
         "accum": 1
       },
-      "sha256": "a74545478f3aa53e165e20feef9b407e88ac7c967be1e6c737e41727a9824675"
+      "sha256": "d86ed4b1510038a6d72886b32f39d1a7fbabce10d3d0adce9a0e891a9e8a15d9"
     },
     "Sim2Only": {
-      "file": "Sim2Only.pth",
-      "format": "state_dict",
+      "file": "Sim2Only.ts.pt",
+      "format": "torchscript",
       "params": 511135,
-      "val_acc": 99.34,
+      "val_acc": 99.36,
       "width_mult": 0.24609375074505807,
       "epochs": 20,
       "train_hparams": {
@@ -49,13 +50,13 @@
         "batch_size": 128,
         "accum": 1
       },
-      "sha256": "cb04459cf2d64da4d2ed49857e2d7f5f1661c100dc39e2e149703f52ef36acce"
+      "sha256": "341215e42f14157b615453a4b6a9b4deeddfe10ebf5d71ab38afa884a5d89a2a"
     },
     "SU2Stereo": {
-      "file": "SU2Stereo.pth",
-      "format": "state_dict",
+      "file": "SU2Stereo.ts.pt",
+      "format": "torchscript",
       "params": 503012,
-      "val_acc": 94.53,
+      "val_acc": 94.8,
       "width_mult": 0.5729166679084301,
       "epochs": 30,
       "train_hparams": {
@@ -64,13 +65,13 @@
         "weight_decay": 0.005,
         "accum": 1
       },
-      "sha256": "20bb77ccbe7e3487c95619eecaae407cbf48f1c52b871aa5178800ec258b0d54"
+      "sha256": "27d8f6ae7a8ddd7c322d612466c466dc194212d270e34c4b3e95733786a252e8"
     },
     "BiLogPolar": {
-      "file": "BiLogPolar.pth",
-      "format": "state_dict",
+      "file": "BiLogPolar.ts.pt",
+      "format": "torchscript",
       "params": 489949,
-      "val_acc": 98.57,
+      "val_acc": 98.59,
       "width_mult": 0.273437499254942,
       "epochs": 25,
       "train_hparams": {
@@ -79,33 +80,29 @@
         "batch_size": 128,
         "accum": 1
       },
-      "sha256": "fb52e4cd9b031b6534f5080fb0f63a1eeb0d51064642b01041f9335eed9ba5de"
+      "sha256": "608f48180e09e42646b2383a53c530c459f51f42060f2012255c3d135cd1f087"
     }
   },
   "random_init": {
     "Classic": {
-      "file": "Classic_random.pth",
-      "format": "state_dict",
-      "width_mult": 0.27734374776482584,
-      "sha256": "9e0a30403f14c15a395bf2341830bb4d2b6ed520beea103c34d66ebb8b901a38"
+      "file": "Classic_random.ts.pt",
+      "format": "torchscript",
+      "sha256": "eb24594b7206fd158ed4371bcdf7b6113ea0d47847a6a9e92ebb7c1dc7090a8f"
     },
     "Sim2Only": {
-      "file": "Sim2Only_random.pth",
-      "format": "state_dict",
-      "width_mult": 0.24609375074505807,
-      "sha256": "e0c765c3e084b82c197da7adcb48cda43fbd9ab158ad643003363de41459736a"
+      "file": "Sim2Only_random.ts.pt",
+      "format": "torchscript",
+      "sha256": "5412729e8af335cda9c37ff402227fe00cbdcc3b378ec373171f7d5ad2f53b3b"
     },
     "SU2Stereo": {
-      "file": "SU2Stereo_random.pth",
-      "format": "state_dict",
-      "width_mult": 0.5729166679084301,
-      "sha256": "711390a00db5385ae591efd542326c1304743d813b51eb544b6f6e70b5d69712"
+      "file": "SU2Stereo_random.ts.pt",
+      "format": "torchscript",
+      "sha256": "c453c9b0532aa94693040dba261881ba6da91392146cf46647c35c4d2c3e8b10"
     },
     "BiLogPolar": {
-      "file": "BiLogPolar_random.pth",
-      "format": "state_dict",
-      "width_mult": 0.273437499254942,
-      "sha256": "956da78b9c87b19ba2faca172ed6f9869e1c81ad9c324bbd26cdf6252a949107"
+      "file": "BiLogPolar_random.ts.pt",
+      "format": "torchscript",
+      "sha256": "e914615b679e56cf947de9912843cd377a8b0bfd0aad9cb7943f7e646079f89d"
     }
   },
   "history": "history.csv"

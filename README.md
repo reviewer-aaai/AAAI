@@ -2,9 +2,10 @@
 
 Anonymous artifact for double-blind review.
 
-This repository contains the full model and training code, the pre-trained
-weights, and a reviewer notebook that replays the entire evaluation protocol
-without retraining anything.
+This repository contains the pre-trained weights and a reviewer notebook that
+replays the entire evaluation protocol without retraining anything. Weights are
+distributed as self-contained TorchScript archives, so the notebook runs with no
+architecture code and no geometric dependency.
 
 **The reviewer notebook is committed with its outputs**, and every figure
 below is reproduced by running it. You can verify the paper's claims by reading
@@ -24,8 +25,8 @@ under [`results/`](results/).
 
 Download this repository as a zip. Open the reviewer notebook in Colab with a
 GPU runtime, upload the zip to the session using the folder icon in the left
-sidebar, and run all. The setup cell extracts it, installs `torch-harmonics`,
-and loads the weights. Nothing else is required.
+sidebar, and run all. The setup cell extracts it and loads the weights.
+Nothing needs to be installed.
 
 (There is no Colab badge and no `git clone` step: both would reveal the
 repository owner during double-blind review. They will be restored on
@@ -38,15 +39,9 @@ acceptance.)
 
 The committed outputs correspond to `RUN_MODE = "full"`.
 
-`torch-harmonics` publishes wheels for CPython 3.10-3.12 only, with no source
-distribution for the 0.9.x line. On a Python 3.13 runtime, `pip install
-torch-harmonics` silently resolves to 0.8.0, whose spherical transforms behave
-differently. The setup cell detects this and builds 0.9.1 from source instead,
-which takes a few minutes. Everything else ships with Colab.
-
-### Option C — retrain from scratch
-
-See [Section 6](#6-retraining-from-scratch).
+Nothing needs to be installed: `torch`, `torchvision`, `numpy`, `pandas`,
+`matplotlib` and `tqdm` all ship with Colab, and no geometric library is
+required.
 
 ---
 
@@ -186,31 +181,33 @@ any curve in the figures can be re-derived directly from the tables.
 
 ```
 .
-├── Ablation_SU2xSim2_MNIST_V10.ipynb            architectures + training loop
 ├── Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb      pre-executed, evaluation only
-├── repro_models.py                              instantiates the architectures
 ├── checkpoints/mnist_v10/
 │   ├── manifest.json                params, accuracy, hyper-parameters, SHA-256
-│   ├── {Classic,Sim2Only,SU2Stereo,BiLogPolar}.pth          trained weights
-│   ├── {Classic,Sim2Only,SU2Stereo,BiLogPolar}_random.pth   at initialisation
+│   ├── {Classic,Sim2Only,SU2Stereo,BiLogPolar}.ts.pt          trained weights
+│   ├── {Classic,Sim2Only,SU2Stereo,BiLogPolar}_random.ts.pt   at initialisation
 │   ├── equivariance_random.json     fallback if random-init weights are absent
 │   └── history.csv                  per-epoch training history
 ├── results/                         figures and tables from the committed run
-├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
-`repro_models.py` executes the definition cells of the training notebook and
-re-exposes the model factories. No architecture code is duplicated, so the code
-a reviewer reads is necessarily the code that loads the weights.
-
 ### On the weight format
 
-Checkpoints are plain `state_dict` files. `manifest.json` records the
-`width_mult` of each model, which is the parameter-budget calibration produced
-by `find_model_width` at training time; it is frozen there rather than
-recomputed, so the architecture a reviewer builds always matches the tensors
-being loaded.
+Checkpoints are TorchScript archives rather than raw `state_dict` files. Every
+one of them satisfies
+
+```
+forward(x : (B, 1, 64, 64)) -> (logits : (B, 10), features : (B, D))
+```
+
+so the notebook can run inference and read internal descriptors without
+instantiating any architecture. Each trace was validated numerically against
+the eager model at three different batch sizes before being written.
+
+Model definitions and the training loop are not included in this artifact.
+They will be released with the camera-ready version.
 
 ### On the descriptor used for equivariance
 
@@ -230,13 +227,10 @@ whether the loaded weights are the ones the authors declared.
 
 ## 6. Retraining from scratch
 
-Open `Ablation_SU2xSim2_MNIST_V10.ipynb` and run all cells. If the
-`checkpoints/` folder produced by a previous run is present, the notebook
-reloads the weights instead of retraining. Delete it to train from scratch.
-
-The final cell of `main()` writes the reviewer package (weights, random-init
-weights, `manifest.json`, `history.csv`) into `release/`, which is the folder
-committed here as `checkpoints/mnist_v10/`.
+Training code is not part of this artifact. Section 7 lists the optimiser
+settings, epoch budgets and data pipeline needed to reimplement the protocol,
+and `checkpoints/mnist_v10/history.csv` gives the per-epoch history of the
+released run.
 
 ---
 
@@ -269,12 +263,10 @@ is no separate validation split.
 translation, accuracies vary by up to ±0.25 points between evaluation passes at
 identical weights. Every figure in Section 2 comes from a single pass.
 
-**Spectral pooling.** `SpectralPoolS2` passes `mmax=out_lmax` explicitly to
-`InverseRealSHT`. Older `torch-harmonics` releases defaulted `mmax` to `lmax`,
-which made the implicit and explicit forms equivalent; recent releases default
-to `nlon//2+1`, which raises a shape assertion. Making it explicit keeps the
-model independent of the library version and preserves the numerics the
-released checkpoints were trained under.
+**Spectral pooling.** The spherical pooling layer pins the maximum azimuthal
+order explicitly rather than relying on the `torch-harmonics` default, which
+changed across releases. The behaviour of the released checkpoints is therefore
+independent of the library version. This is baked into the exported archives.
 
 **Epoch budgets.** Epoch counts differ across models (Classic 20, Sim(2) only
 20, SU(2) stereographic 30, Bi-LogPolar 25); each was trained until its
@@ -289,36 +281,29 @@ recorded.
 
 **Training** (weights released here):
 
-- Python 3.12, torch-harmonics 0.9.1 from PyPI
+- Python 3.12
 - Single GPU, one run per architecture; epoch counts are in Section 7 and the
   per-epoch history is in `checkpoints/mnist_v10/history.csv`
 
 **Evaluation and export** (the committed notebook run):
 
 - Python 3.13.15, PyTorch 2.11.0+cu128, torchvision 0.26.0+cu128
-- torch-harmonics 0.9.1, built from source (no wheel for CPython 3.13)
 - NVIDIA L4, CUDA 12.8
 
-The two environments differ in Python version and in how `torch-harmonics` was
-obtained, but the pinned library version is the same, and `SpectralPoolS2` no
-longer depends on the library's default `mmax` (see Section 7). Phase A of the
-reviewer notebook checks that the released weights still reproduce the reported
-accuracies under the evaluation environment.
-
-Versions are pinned in `requirements.txt` and recorded in `manifest.json`.
+Reviewers need neither environment: TorchScript archives are forward
+compatible, so the checkpoints load with any PyTorch release at or above the
+version recorded in `manifest.json`.
 
 ---
 
 ## 9. License and citation
 
-Code and weights are released under the BSD 3-Clause License; see
-[`LICENSE`](LICENSE).
+The released weights are covered by the BSD 3-Clause License; see
+[`LICENSE`](LICENSE). Model source code is not part of this artifact and will
+be released with the camera-ready version.
 
 MNIST is used under its original terms and is not redistributed here: the
 notebook downloads it via `torchvision.datasets.MNIST`.
-
-`torch-harmonics` (NVIDIA) is a dependency, also under BSD 3-Clause. It is not
-vendored into this repository.
 
 Author and citation information is withheld during the double-blind review
 period and will be added on acceptance.
