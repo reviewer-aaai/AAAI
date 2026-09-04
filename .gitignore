@@ -1,7 +1,5 @@
 # Données et sorties
 data/
-results/
-*.pth
 
 # Python
 __pycache__/
