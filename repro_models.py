@@ -1,19 +1,19 @@
 """
 repro_models.py
-═════════════════════════════════════════════════════════════════════════════
-Pont entre le notebook d'entraînement et le notebook reviewer.
+=============================================================================
+Bridge between the training notebook and the reviewer notebook.
 
-Le notebook d'entraînement est la source unique des architectures : ce module
-exécute ses cellules de définition et réexpose les fabriques, sans dupliquer
-une seule ligne de modèle. Aucun entraînement n'est déclenché (main() est
-protégé par le garde __name__).
+The training notebook is the single source of truth for the architectures:
+this module executes its definition cells and re-exposes the factories,
+without duplicating a single line of model code. No training is triggered,
+since main() sits behind the __name__ guard.
 
-Usage :
+Usage:
     import repro_models
     model = repro_models.build("SU2Stereo", width_mult=0.7314)
     model = repro_models.load("SU2Stereo", "checkpoints/mnist_v10")
 
-À placer à la racine du dépôt, à côté du notebook d'entraînement.
+Place this file at the repository root, next to the training notebook.
 """
 
 import glob
@@ -23,7 +23,7 @@ import os
 import torch
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Localisation du notebook d'entraînement
+#  Locating the training notebook
 # ─────────────────────────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,16 +34,16 @@ if NOTEBOOK is None:
               or glob.glob(os.path.join(_HERE, "Ablation_*.ipynb")))
     if not _cands:
         raise FileNotFoundError(
-            "Notebook d'entraînement introuvable. Placez-le à la racine du dépôt "
-            "ou renseignez la variable d'environnement REPRO_TRAINING_NOTEBOOK.")
+            "Training notebook not found. Place it at the repository root, or "
+            "set the REPRO_TRAINING_NOTEBOOK environment variable.")
     NOTEBOOK = _cands[0]
 
 
 def _exec_notebook(path):
-    """Exécute les cellules de code du notebook dans un espace de noms isolé.
+    """Execute the notebook's code cells in an isolated namespace.
 
-    Les lignes magiques (!pip, %cd…) sont retirées, et __name__ est fixé de
-    sorte que le  if __name__ == "__main__": main()  final ne se déclenche pas.
+    Magic lines (!pip, %cd) are stripped, and __name__ is set so that the
+    trailing  if __name__ == "__main__": main()  does not fire.
     """
     with open(path, encoding="utf-8") as f:
         nb = json.load(f)
@@ -61,13 +61,13 @@ def _exec_notebook(path):
             exec(compile(src, f"{os.path.basename(path)}[cell {i}]", "exec"), ns)
         except Exception as e:
             raise RuntimeError(
-                f"Échec à la cellule {i} de {path} : {type(e).__name__}: {e}") from e
+                f"Failed at cell {i} of {path}: {type(e).__name__}: {e}") from e
     return ns
 
 
 _NS = _exec_notebook(NOTEBOOK)
 
-# Symboles requis, réexposés pour usage direct
+# Required symbols, re-exposed for direct use
 ClassicResNet          = _NS["ClassicResNet"]
 Sim2OnlyResNet         = _NS["Sim2OnlyResNet"]
 SU2SphericalResNetSO3  = _NS["SU2SphericalResNetSO3"]
@@ -76,9 +76,9 @@ make_mnist_model       = _NS["make_mnist_model"]
 count_parameters       = _NS["count_parameters"]
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Configuration des fabriques
-#  Recopiée à l'identique depuis main(). Toute divergence ferait échouer
-#  load_state_dict, donc ce bloc et celui du notebook doivent rester alignés.
+#  Factory configuration
+#  Copied verbatim from main(). Any divergence would make load_state_dict fail,
+#  so this block and the one in the notebook must stay in sync.
 # ─────────────────────────────────────────────────────────────────────────────
 N_BLOCKS = (1, 1, 2, 1)
 
@@ -102,23 +102,23 @@ TAGS = list(FACTORIES)
 
 
 def build(tag, width_mult):
-    """Instancie l'architecture `tag` à la largeur donnée, sans poids entraînés.
+    """Instantiate architecture `tag` at the given width, with random weights.
 
-    `width_mult` provient du manifeste : il fige la calibration à 500k
-    paramètres faite par find_model_width au moment de l'entraînement.
+    `width_mult` comes from the manifest: it freezes the 500k-parameter
+    calibration performed by find_model_width at training time.
     """
     if tag not in FACTORIES:
-        raise KeyError(f"Modèle inconnu : {tag!r}. Attendu : {TAGS}")
+        raise KeyError(f"Unknown model {tag!r}. Expected one of: {TAGS}")
     if width_mult is None:
         raise ValueError(
-            f"[{tag}] width_mult manquant. Il doit venir de manifest.json ; "
-            f"le recalculer risquerait de produire des dimensions différentes "
-            f"de celles du checkpoint.")
+            f"[{tag}] missing width_mult. It must come from manifest.json; "
+            f"recomputing it could yield dimensions that differ from those of "
+            f"the checkpoint.")
     return FACTORIES[tag](float(width_mult))
 
 
 def load(tag, ckpt_dir, manifest=None, device="cpu", strict=True):
-    """Instancie `tag` et y charge les poids entraînés."""
+    """Instantiate `tag` and load the trained weights into it."""
     if manifest is None:
         with open(os.path.join(ckpt_dir, "manifest.json"), encoding="utf-8") as f:
             manifest = json.load(f)
@@ -134,12 +134,12 @@ def load(tag, ckpt_dir, manifest=None, device="cpu", strict=True):
     n_p, ref = count_parameters(model), info.get("params")
     if ref is not None and n_p != ref:
         raise RuntimeError(
-            f"[{tag}] {n_p:,} paramètres construits contre {ref:,} annoncés "
-            f"dans le manifeste. width_mult ou configuration divergents.")
+            f"[{tag}] built {n_p:,} parameters against {ref:,} declared in "
+            f"the manifest. width_mult or configuration have diverged.")
     return model
 
 
 if __name__ == "__main__":
-    print(f"Notebook source : {NOTEBOOK}")
+    print(f"Source notebook: {NOTEBOOK}")
     for t in TAGS:
         print(f"  • {t}")
