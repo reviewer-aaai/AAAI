@@ -155,40 +155,7 @@ notebook.
 
 ---
 
-## 3. What the notebook checks
-
-| Phase | Question it answers | Outputs |
-|---|---|---|
-| **A** | Do the released weights reproduce the reported accuracies? | `table1_clean_accuracy.csv` |
-| **B** | Is equivariance a property of the architecture rather than a by-product of training? | `equivariance_random.csv`, `equivariance_trained.csv`, `equivariance_comparison.png` |
-| **C** | Do the tested amplitudes remain semantically valid? | `transforms_*.png` |
-| **D** | How does accuracy degrade with amplitude, across six families? | `rob_sweep_*.csv`, `rob_summary.csv`, `robustness_curves.png` |
-| **E** | What did the training curves look like? | `training.png`, `history.csv` |
-| **F** | Cross-model summary | `reviewer_summary.csv` |
-
-Phase E replots a recorded history. Nothing is retrained.
-
----
-
-## 4. Mapping from the paper to this repository
-
-| Paper | File | Notebook phase |
-|---|---|---|
-| Table `<n>` (clean accuracy, parameter counts) | `results/table1_clean_accuracy.csv` | A |
-| Table `<n>` (robustness summary) | `results/rob_summary.csv` | D |
-| Figure `<n>` (robustness curves) | `results/robustness_curves.png` | D |
-| Figure `<n>` (architectural equivariance) | `results/equivariance_random.png` | B |
-| Figure `<n>` (equivariance, random vs trained) | `results/equivariance_comparison.png` | B |
-| Figure `<n>` (transformation examples) | `results/transforms_*.png` | C |
-| Figure `<n>` (training curves) | `results/training.png` | E |
-| Appendix `<n>` (per-amplitude sweeps) | `results/rob_sweep_{phi,psi1,scale,proj,combo,su2}.csv` | D |
-
-Each `rob_sweep_*.csv` has one row per amplitude and one column per model, so
-any curve in the figures can be re-derived directly from the tables.
-
----
-
-## 5. Repository layout
+## 3. Repository layout
 
 ```
 .
@@ -237,7 +204,7 @@ whether the loaded weights are the ones the authors declared.
 
 ---
 
-## 6. Retraining from scratch
+## 4. Retraining from scratch
 
 Training code is not part of this artifact. Section 7 lists the optimiser
 settings, epoch budgets and data pipeline needed to reimplement the protocol,
@@ -246,7 +213,7 @@ released run.
 
 ---
 
-## 7. Protocol notes
+## 5. Protocol notes
 
 Choices a reviewer will want stated explicitly. The notebook surfaces all of
 them at run time.
@@ -286,7 +253,7 @@ accuracy curve flattened.
 
 ---
 
-## 8. Environment
+## 6. Environment
 
 Training and evaluation happened in two separate sessions, so both are
 recorded.
@@ -308,7 +275,7 @@ version recorded in `manifest.json`.
 
 ---
 
-## 9. License and citation
+## 7. License and citation
 
 The released weights are covered by the BSD 3-Clause License; see
 [`LICENSE`](LICENSE). Model source code is not part of this artifact and will
