@@ -7,8 +7,8 @@ replays the entire evaluation protocol without retraining anything. Weights are
 distributed as self-contained TorchScript archives, so the notebook runs with no
 architecture code and no geometric dependency.
 
-**The reviewer notebook is committed with its outputs**, and every figure
-below is reproduced by running it. You can verify the paper's claims by reading
+**The reviewer notebooks are committed with their outputs**, and every figure
+below is reproduced by running them. You can verify the paper's claims by reading
 this page, without executing a single cell.
 
 ---
@@ -17,27 +17,36 @@ this page, without executing a single cell.
 
 ### Option A — read only (0 minutes)
 
-Open [`Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb`](Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb).
-All cells are pre-executed. The same content is available as standalone files
-under [`results/`](results/).
+Two pre-executed copies of the reviewer notebook are committed, identical
+except for the amount of data each one sweeps:
+
+| Notebook | Test set | Sweep resolution | Runtime |
+|---|---|---|---|
+| [`..._FULL.ipynb`](Reviewer_Repro_SU2xSim2_MNIST_FULL.ipynb) | 10,000 images | as in the paper | ≈ 45 min |
+| [`..._QUICK.ipynb`](Reviewer_Repro_SU2xSim2_MNIST_QUICK.ipynb) | 2,000 images | reduced | ≈ 5 min |
+
+**The `_FULL` run is the one the paper reports**, and the one to read. The
+`_QUICK` run is committed so that a reviewer who reruns in `quick` mode has
+something to compare against: its numbers differ from `_FULL` by up to a few
+points on the projective and Haar sweeps, where averaging over 12 rather than
+40 random transformations is the dominant source of variation.
+
+Every table and figure is also available as a standalone file under
+[`results/`](results/), which mirrors the `_FULL` run.
 
 ### Option B — re-run the evaluation
 
-Download this repository as a zip. Open the reviewer notebook in Colab with a
-GPU runtime, upload the zip to the session using the folder icon in the left
-sidebar, and run all. The setup cell extracts it and loads the weights.
-Nothing needs to be installed.
+Download this repository as a zip. Open either notebook in Colab with a GPU
+runtime, upload the zip to the session using the folder icon in the left
+sidebar, and run all. The setup cell extracts it and loads the weights. Nothing
+needs to be installed.
+
+`RUN_MODE` in the configuration cell selects the regime; set it to `"full"` to
+reproduce the published numbers, or leave it at `"quick"` for a fast check.
 
 (There is no Colab badge and no `git clone` step: both would reveal the
 repository owner during double-blind review. They will be restored on
 acceptance.)
-
-| `RUN_MODE` | Test set | Sweep resolution | Wall clock (T4) |
-|---|---|---|---|
-| `"quick"` | 2,000 images | reduced | ≈ 5 min |
-| `"full"` | 10,000 images | as in the paper | ≈ 35–50 min |
-
-The committed outputs correspond to `RUN_MODE = "full"`.
 
 Nothing needs to be installed: `torch`, `torchvision`, `numpy`, `pandas`,
 `matplotlib` and `tqdm` all ship with Colab, and no geometric library is
@@ -56,33 +65,35 @@ paper's central result.
 
 | Model | Acc, 10 classes | Acc @ zero amplitude | ΔΦ (Möbius) | Δψ₁ (planar rot.) | Scale range | Projective (μ ± σ) | ΔCombo | SU(2) Haar (μ ± σ) | SU(2) Haar min |
 |---|---|---|---|---|---|---|---|---|---|
-| Classic ResNet | 99.59 | 99.4 | 92.5 | 78.9 | 72.9 | 35.4 ± 25.2 | 95.6 | 13.1 ± 17.1 | 2.9 |
-| Sim(2) only | 99.34 | 99.6 | 91.1 | **19.0** | 74.7 | **73.9 ± 14.0** | 93.2 | 26.1 ± 25.9 | 4.8 |
-| SU(2) stereographic | 94.53 | 95.1 | **53.0** | **0.0** | 82.2 | 59.0 ± 26.9 | **53.0** | **49.9 ± 14.0** | **36.4** |
-| Bi-LogPolar | 98.57 | 98.6 | 88.6 | 31.2 | 82.4 | 54.0 ± 20.5 | 94.2 | 15.4 ± 18.1 | 4.1 |
+| Classic ResNet | 99.59 | 99.48 | 86.0 | 79.9 | 71.7 | 35.6 ± 24.0 | 96.3 | 13.4 ± 17.3 | 3.3 |
+| Sim(2) only | 99.34 | 99.50 | 90.8 | **20.7** | 77.0 | **71.9 ± 14.1** | 93.0 | 25.2 ± 23.7 | 6.6 |
+| SU(2) stereographic | 94.53 | 95.29 | **50.8** | **0.0** | 85.1 | 60.6 ± 26.3 | **50.8** | **52.1 ± 13.5** | **38.1** |
+| Bi-LogPolar | 98.57 | 98.69 | 90.9 | 29.5 | 80.5 | 54.7 ± 20.9 | 92.5 | 17.1 ± 19.2 | 4.9 |
 
 All values are percentages. Δ is the accuracy drop between zero and maximum
 amplitude, so **lower Δ means more invariant**. The first column covers all ten
 classes; every other column comes from the sweeps, which exclude classes 1 and
 9 (see [Section 7](#7-protocol-notes)). The two are therefore not directly
-comparable, and both fluctuate by up to ±0.25 points between runs because the
-evaluation transform applies a random translation.
+comparable, and both fluctuate by a few tenths of a point between runs because
+the evaluation transform applies a random translation.
 
-The four models are calibrated to the same parameter budget (500k, via
-`find_model_width`), so the comparison is capacity-matched.
+The four models are calibrated to the same parameter budget (500k), so the
+comparison is capacity-matched: 498k, 511k, 503k and 499k parameters
+respectively.
 
 **Reading the table.** The SU(2) stereographic model is exactly invariant to
-planar rotation (Δψ₁ = 0.0, a flat green line in the ψ₁ panel above), and it is
-the only model that survives Haar-distributed SU(2) transformations at a useful
-rate: mean 49.9% with a worst case of 36.4%, against 13.1% mean and 2.9% worst
-case for the classical baseline. Under composed φ+ψ₁ Möbius transformations its
-drop is roughly half that of every other model.
+planar rotation (Δψ₁ = 0.0, a flat line in the ψ₁ panel above), and it is the
+only model that survives Haar-distributed SU(2) transformations at a useful
+rate: 52.1% on average with a worst case of 38.1%, against 13.4% and 3.3% for
+the classical baseline. Its worst case alone exceeds every other model's
+average. Under composed φ+ψ₁ Möbius transformations its drop is roughly half
+that of the other three.
 
 Three costs are equally visible and are reported here rather than buried. Clean
-accuracy is 4.4 points below the baselines. Scale robustness is the worst of
-the four (range 82.2), the model degrading sharply below 0.7× and above 1.5×.
-Under random projective homographies the Sim(2) model is ahead (73.9% versus
-59.0%), which is expected since those transformations are not in SU(2).
+accuracy is about 4.2 points below the baselines. Scale robustness is the worst
+of the four (range 85.1), the model degrading sharply below 0.7× and above
+1.5×. Under random projective homographies the Sim(2) model is ahead (71.9%
+versus 60.6%), which is expected since those transformations are not in SU(2).
 
 ### 2.2 Architectural equivariance
 
@@ -181,7 +192,8 @@ any curve in the figures can be re-derived directly from the tables.
 
 ```
 .
-├── Reviewer_Repro_SU2xSim2_MNIST_V10.ipynb      pre-executed, evaluation only
+├── Reviewer_Repro_SU2xSim2_MNIST_V10_FULL.ipynb  pre-executed, full protocol
+├── Reviewer_Repro_SU2xSim2_MNIST_V10_QUICK.ipynb pre-executed, fast check
 ├── checkpoints/mnist_v10/
 │   ├── manifest.json                params, accuracy, hyper-parameters, SHA-256
 │   ├── {Classic,Sim2Only,SU2Stereo,BiLogPolar}.ts.pt          trained weights
